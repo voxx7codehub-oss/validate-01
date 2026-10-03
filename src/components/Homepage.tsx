@@ -1,6 +1,27 @@
-import React from 'react';
-import { ArrowRight, CheckCircle2, ShieldCheck, Search, Users, Target, Layers, FileText, Upload, Plus, Trash2, Copy } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  ShieldCheck,
+  Search,
+  Users,
+  Target,
+  Layers,
+  FileText,
+  Upload,
+  Plus,
+  Trash2,
+  Copy,
+  Sparkles,
+  BookOpen,
+  HelpCircle,
+  TrendingUp,
+  Award,
+  Zap,
+  Check,
+} from 'lucide-react';
 import { StartupProject } from '../types';
+import { STARTER_TEMPLATES, IdeaTemplate } from '../data/templates';
 
 interface HomepageProps {
   projects: StartupProject[];
@@ -10,6 +31,8 @@ interface HomepageProps {
   onDuplicateProject: (projectId: string) => void;
   onImportClick: () => void;
   onNavigateSection: (sectionId: string) => void;
+  onSelectTemplate?: (template: IdeaTemplate) => void;
+  onOpenPlaybook?: () => void;
 }
 
 export const Homepage: React.FC<HomepageProps> = ({
@@ -20,21 +43,42 @@ export const Homepage: React.FC<HomepageProps> = ({
   onDuplicateProject,
   onImportClick,
   onNavigateSection,
+  onSelectTemplate,
+  onOpenPlaybook,
 }) => {
+  const [projectSearch, setProjectSearch] = useState('');
+  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
+
+  const filteredProjects = projects.filter((p) =>
+    (p.name || '').toLowerCase().includes(projectSearch.toLowerCase()) ||
+    (p.idea?.whatBuilding || '').toLowerCase().includes(projectSearch.toLowerCase()) ||
+    (p.idea?.problemSolved || '').toLowerCase().includes(projectSearch.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-[#F7F9FC] text-[#111827]">
-      {/* Top Bar / Header adhering strictly to Top Bar Contract */}
+      {/* Top Bar / Header */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Zone 1: Single text wordmark */}
-          <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-xs">
+              V
+            </div>
             <span className="text-xl font-bold tracking-tight text-slate-900">
               VALIDATE<span className="text-blue-600">AI</span>
             </span>
           </div>
 
-          {/* Zone 2: Navigation Links */}
+          {/* Navigation Links */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+            <button
+              onClick={() => onNavigateSection('templates')}
+              className="hover:text-slate-900 transition-colors flex items-center gap-1.5"
+            >
+              <Zap className="w-4 h-4 text-amber-500" />
+              Idea Templates
+            </button>
             <button
               onClick={() => onNavigateSection('how-it-works')}
               className="hover:text-slate-900 transition-colors"
@@ -42,41 +86,44 @@ export const Homepage: React.FC<HomepageProps> = ({
               How It Works
             </button>
             <button
-              onClick={() => onNavigateSection('features')}
+              onClick={() => onNavigateSection('framework')}
               className="hover:text-slate-900 transition-colors"
             >
-              Features
-            </button>
-            <button
-              onClick={() => onNavigateSection('process')}
-              className="hover:text-slate-900 transition-colors"
-            >
-              Validation Process
+              The Framework
             </button>
             {projects.length > 0 && (
               <button
                 onClick={() => onNavigateSection('projects')}
-                className="hover:text-slate-900 transition-colors"
+                className="hover:text-slate-900 transition-colors font-semibold text-blue-600"
               >
                 My Projects ({projects.length})
               </button>
             )}
           </nav>
 
-          {/* Zone 3: Primary Actions */}
-          <div className="flex items-center gap-3">
+          {/* Primary Actions */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {onOpenPlaybook && (
+              <button
+                onClick={onOpenPlaybook}
+                className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                Validation Playbook
+              </button>
+            )}
             <button
               onClick={onImportClick}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors"
             >
-              <Upload className="w-3.5 h-3.5" />
+              <Upload className="w-3.5 h-3.5 text-slate-500" />
               Import JSON
             </button>
             <button
               onClick={onStartValidating}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-xs transition-colors"
             >
-              Start Validating
+              <span>Validate Idea</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -84,129 +131,193 @@ export const Homepage: React.FC<HomepageProps> = ({
       </header>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-16 px-6 max-w-5xl mx-auto text-center">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6 max-w-3xl mx-auto" style={{ textWrap: 'balance' }}>
-          Validate your idea before you build it.
-        </h1>
-        <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed mb-10">
-          Analyze your startup idea, understand your customers, research the market, discover competitors, identify risks, and create a practical validation plan.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-          <button
-            onClick={onStartValidating}
-            className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
-          >
-            Start Validating
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onNavigateSection('how-it-works')}
-            className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors"
-          >
-            How It Works
-          </button>
+      <section className="pt-16 pb-12 px-6 max-w-5xl mx-auto text-center">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold mb-6 animate-in fade-in slide-in-from-top-2">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+          Stop building before validating • Save months of wasted engineering
         </div>
 
-        {/* Process Flow Diagram */}
-        <div id="process" className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 max-w-4xl mx-auto text-left">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-6 text-center">
-            Structured Validation Workflow
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.15] mb-6 max-w-4xl mx-auto" style={{ textWrap: 'balance' }}>
+          Validate your startup idea <br className="hidden sm:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            before you write a single line of code.
+          </span>
+        </h1>
+
+        <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mb-8">
+          Analyze real customer pain points, uncover genuine competitors, formulate unbiased interview questions, and build a lean MVP test plan grounded in empirical evidence.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-14">
+          <button
+            onClick={onStartValidating}
+            className="w-full sm:w-auto px-7 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            Start Validating My Idea
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          {onOpenPlaybook && (
+            <button
+              onClick={onOpenPlaybook}
+              className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition-colors flex items-center justify-center gap-2"
+            >
+              <BookOpen className="w-4 h-4 text-slate-500" />
+              Read Founder Playbook
+            </button>
+          )}
+        </div>
+
+        {/* 1-Click Interactive Starter Templates Grid */}
+        <div id="templates" className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 max-w-5xl mx-auto text-left shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Quick-Start Interactive Demos
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mt-1">
+                Don't have an idea ready? Try a 1-click sample idea:
+              </h3>
+            </div>
+            <span className="text-xs text-slate-400">Click any card to load instant analysis</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
-            {[
-              { step: '01', title: 'IDEA', desc: 'Define problem & who feels it' },
-              { step: '02', title: 'CUSTOMER', desc: 'Map segments & friction points' },
-              { step: '03', title: 'MARKET', desc: 'Ground dynamics & verified scope' },
-              { step: '04', title: 'COMPETITION', desc: 'Uncover real alternatives' },
-              { step: '05', title: 'VALIDATION', desc: 'Design empirical tests' },
-              { step: '06', title: 'REPORT', desc: 'Synthesize actionable strategy' },
-            ].map((item, idx) => (
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {STARTER_TEMPLATES.map((tpl) => (
               <div
-                key={item.step}
-                className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-col justify-between"
+                key={tpl.id}
+                className="group border border-slate-200 hover:border-blue-400 rounded-xl p-4 transition-all hover:shadow-md bg-slate-50/50 hover:bg-white flex flex-col justify-between"
               >
                 <div>
-                  <div className="text-[11px] font-mono text-blue-600 font-semibold mb-1">
-                    {item.step}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full">
+                      {tpl.category}
+                    </span>
+                    <span className="text-[10px] font-medium text-slate-400 font-mono">
+                      {tpl.badge}
+                    </span>
                   </div>
-                  <div className="text-xs font-bold text-slate-900 mb-1">{item.title}</div>
+                  <h4 className="font-bold text-slate-900 text-sm group-hover:text-blue-600 transition-colors">
+                    {tpl.name}
+                  </h4>
+                  <p className="text-xs text-slate-600 mt-1 mb-2 font-medium">
+                    {tpl.tagline}
+                  </p>
+                  <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                    {tpl.description}
+                  </p>
                 </div>
-                <div className="text-[11px] text-slate-500 leading-tight">{item.desc}</div>
+
+                <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Model: <strong className="text-slate-700">{tpl.data.businessModel}</strong>
+                  </span>
+                  <button
+                    onClick={() => onSelectTemplate ? onSelectTemplate(tpl) : onStartValidating()}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    <span>Test This Idea</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Saved Projects Section (if any exist) */}
+      {/* Saved Projects Section */}
       {projects.length > 0 && (
-        <section id="projects" className="py-12 px-6 max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
+        <section id="projects" className="py-12 px-6 max-w-6xl mx-auto border-t border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Your Saved Projects</h2>
-              <p className="text-xs text-slate-500">Stored privately in your browser local storage.</p>
+              <h2 className="text-xl font-bold text-slate-900">Your Validation Workspaces</h2>
+              <p className="text-xs text-slate-500">
+                {projects.length} project{projects.length > 1 ? 's' : ''} saved privately in your local browser storage.
+              </p>
             </div>
-            <button
-              onClick={onStartValidating}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              New Idea
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {projects.map((proj) => (
-              <div
-                key={proj.id}
-                className="bg-white border border-slate-200 hover:border-slate-300 rounded-lg p-5 flex flex-col justify-between transition-shadow hover:shadow-sm"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-slate-900 text-base truncate">
-                      {proj.name || 'Untitled Idea'}
-                    </h3>
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      {new Date(proj.updatedAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 line-clamp-2 mb-3">
-                    {proj.idea.whatBuilding || 'No description provided'}
-                  </p>
-                  <div className="text-[11px] text-slate-500 mb-4 bg-slate-50 p-2 rounded border border-slate-100">
-                    <span className="font-medium text-slate-700">Problem: </span>
-                    <span className="line-clamp-1">{proj.idea.problemSolved || 'Unspecified'}</span>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => onOpenProject(proj.id)}
-                    className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-                  >
-                    Open Workspace
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => onDuplicateProject(proj.id)}
-                      title="Duplicate Project"
-                      className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => onDeleteProject(proj.id)}
-                      title="Delete Project"
-                      className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={projectSearch}
+                  onChange={(e) => setProjectSearch(e.target.value)}
+                  placeholder="Filter projects..."
+                  className="pl-8 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
+                />
               </div>
-            ))}
+              <button
+                onClick={onStartValidating}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                New Idea
+              </button>
+            </div>
           </div>
+
+          {filteredProjects.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 text-xs">
+              No projects match your filter "{projectSearch}".
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredProjects.map((proj) => (
+                <div
+                  key={proj.id}
+                  className="bg-white border border-slate-200 hover:border-slate-300 rounded-xl p-5 flex flex-col justify-between transition-all hover:shadow-md"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <h3 className="font-bold text-slate-900 text-base truncate">
+                        {proj.name || 'Untitled Idea'}
+                      </h3>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {new Date(proj.updatedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 line-clamp-2 mb-3 leading-relaxed">
+                      {proj.idea.whatBuilding || 'No description provided'}
+                    </p>
+                    <div className="text-[11px] text-slate-500 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                      <span className="font-semibold text-slate-700">Core Problem: </span>
+                      <span className="line-clamp-1">{proj.idea.problemSolved || 'Unspecified'}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => onOpenProject(proj.id)}
+                      className="px-3.5 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-1"
+                    >
+                      <span>Open Workspace</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => onDuplicateProject(proj.id)}
+                        title="Duplicate Project"
+                        className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => onDeleteProject(proj.id)}
+                        title="Delete Project"
+                        className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -215,128 +326,114 @@ export const Homepage: React.FC<HomepageProps> = ({
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">How VALIDATEAI Works</h2>
           <p className="text-sm text-slate-600">
-            Most startups fail not from bad execution, but from building something nobody urgently needs. VALIDATEAI forces rigor where founders usually rely on guesswork.
+            Most startups fail not from poor engineering, but from building something nobody urgently needs. VALIDATEAI brings institutional-grade validation to every founder.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white border border-slate-200 rounded-lg p-6">
-            <div className="w-9 h-9 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm mb-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm mb-4">
               1
             </div>
-            <h3 className="font-semibold text-slate-900 text-base mb-2">Uncover Hidden Assumptions</h3>
+            <h3 className="font-bold text-slate-900 text-base mb-2">Uncover Hidden Assumptions</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Every business plan contains dozens of implicit bets: that the problem exists, that alternatives are intolerable, and that users have budget. We extract every assumption into an organized test backlog.
+              Every pitch deck relies on hidden assumptions. We automatically extract customer, pricing, market, and technical assumptions into a prioritized validation backlog.
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-lg p-6">
-            <div className="w-9 h-9 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm mb-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm mb-4">
               2
             </div>
-            <h3 className="font-semibold text-slate-900 text-base mb-2">Neutral Customer Inquiries</h3>
+            <h3 className="font-bold text-slate-900 text-base mb-2">Neutral Customer Inquiries</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Leading questions ("Would you buy this?") produce false compliments. VALIDATEAI formulates unbiased discovery questions focused strictly on past behavior and current workaround friction.
+              Leading questions ("Would you buy this?") produce false compliments. We formulate Mom Test compliant discovery questions focused strictly on past customer behavior.
             </p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-lg p-6">
-            <div className="w-9 h-9 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm mb-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm mb-4">
               3
             </div>
-            <h3 className="font-semibold text-slate-900 text-base mb-2">Empirical Test Design & MVP Scope</h3>
+            <h3 className="font-bold text-slate-900 text-base mb-2">3-Bucket MVP Strategy</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Define the smallest testable experiment before engineering. Separate MUST HAVE validation features from bloated nice-to-haves so you launch tests in days rather than months.
+              Stop scope creep in its tracks. Categorize features strictly into MUST HAVE, SHOULD HAVE, and LATER so you can run live experiments in days rather than quarters.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section id="features" className="py-16 px-6 max-w-6xl mx-auto border-t border-slate-200">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Professional Validation Intelligence</h2>
-          <p className="text-sm text-slate-600">
-            A complete suite for early-stage founders, startup studios, and accelerators.
-          </p>
-        </div>
+      {/* Validation Readiness Mini-Quiz */}
+      <section className="py-12 px-6 max-w-4xl mx-auto">
+        <div className="bg-gradient-to-br from-blue-900 to-indigo-950 text-white rounded-3xl p-8 sm:p-10 shadow-xl relative overflow-hidden">
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-xs font-semibold mb-4">
+              <Award className="w-3.5 h-3.5 text-blue-300" />
+              Quick Founder Self-Check
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {[
-            {
-              icon: Target,
-              title: 'Problem Framing',
-              desc: 'Confirm urgency, frequency, cost of inaction, and current coping mechanisms.',
-            },
-            {
-              icon: Users,
-              title: 'Customer Discovery',
-              desc: 'Segment buyers, map decision criteria, and craft unbiased interview guides.',
-            },
-            {
-              icon: Search,
-              title: 'Alternative Analysis',
-              desc: 'Evaluate direct, indirect, and habit substitutes with honest evidence attribution.',
-            },
-            {
-              icon: ShieldCheck,
-              title: 'Risk & Assumption Matrix',
-              desc: 'Track uncertainty across customer, market, technology, and pricing dimensions.',
-            },
-            {
-              icon: Layers,
-              title: 'MVP Scoping',
-              desc: 'Enforce discipline with strict MUST HAVE, SHOULD HAVE, and LATER categorization.',
-            },
-            {
-              icon: CheckCircle2,
-              title: 'Experiment Playbooks',
-              desc: 'Step-by-step validation protocols: concierge tests, smoke landing pages, and preorders.',
-            },
-            {
-              icon: FileText,
-              title: 'Exportable Reports',
-              desc: 'Generate comprehensive executive validation documents in PDF, Markdown, and JSON.',
-            },
-            {
-              icon: Upload,
-              title: 'Local Privacy & Versions',
-              desc: 'Data remains in browser localStorage. Snapshot versions, compare projects, and import anytime.',
-            },
-          ].map((item, i) => {
-            const Icon = item.icon;
-            return (
-              <div key={i} className="bg-white border border-slate-200 rounded-lg p-5">
-                <div className="w-8 h-8 rounded bg-slate-100 text-slate-700 flex items-center justify-center mb-3">
-                  <Icon className="w-4 h-4" />
+            <h3 className="text-xl sm:text-2xl font-extrabold mb-3">
+              "Have you spoken with 10 people who experienced this problem in the past 30 days?"
+            </h3>
+
+            <div className="grid sm:grid-cols-2 gap-3 mt-6">
+              <button
+                onClick={() => setQuizAnswer(1)}
+                className={`p-4 rounded-xl text-left border transition-all ${
+                  quizAnswer === 1
+                    ? 'bg-emerald-500/20 border-emerald-400 text-white'
+                    : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'
+                }`}
+              >
+                <div className="font-bold text-sm mb-1 flex items-center justify-between">
+                  <span>Yes, I have notes from 10+ calls</span>
+                  {quizAnswer === 1 && <Check className="w-4 h-4 text-emerald-400" />}
                 </div>
-                <h3 className="font-semibold text-slate-900 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">{item.desc}</p>
-              </div>
-            );
-          })}
+                <p className="text-xs text-slate-300">
+                  Awesome! Use VALIDATEAI to extract competitive gaps, pricing models, and design your lean MVP.
+                </p>
+              </button>
+
+              <button
+                onClick={() => setQuizAnswer(2)}
+                className={`p-4 rounded-xl text-left border transition-all ${
+                  quizAnswer === 2
+                    ? 'bg-amber-500/20 border-amber-400 text-white'
+                    : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-200'
+                }`}
+              >
+                <div className="font-bold text-sm mb-1 flex items-center justify-between">
+                  <span>Not yet, just starting out</span>
+                  {quizAnswer === 2 && <Check className="w-4 h-4 text-amber-400" />}
+                </div>
+                <p className="text-xs text-slate-300">
+                  Perfect timing! VALIDATEAI will generate your neutral interview script so you don't waste time on biased questions.
+                </p>
+              </button>
+            </div>
+
+            <div className="mt-8 text-center sm:text-left">
+              <button
+                onClick={onStartValidating}
+                className="px-6 py-2.5 text-xs font-bold text-slate-900 bg-white hover:bg-slate-100 rounded-xl shadow-sm transition-colors inline-flex items-center gap-2"
+              >
+                Start Validating Now
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* CTA Footer */}
-      <footer className="py-12 px-6 border-t border-slate-200 bg-white text-center">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-lg font-bold text-slate-900 mb-2">VALIDATEAI</div>
-          <p className="text-xs text-slate-500 mb-6">Validate your idea before you build it.</p>
-          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-600 mb-8">
-            <button onClick={onStartValidating} className="hover:text-slate-900 font-medium">
-              Start Validating
-            </button>
-            <button onClick={onImportClick} className="hover:text-slate-900 font-medium">
-              Import Project
-            </button>
-            <button onClick={() => onNavigateSection('how-it-works')} className="hover:text-slate-900 font-medium">
-              How It Works
-            </button>
-          </div>
-          <p className="text-[11px] text-slate-400">
-            Data is stored in browser local storage. No cloud database or authentication required.
-          </p>
+      {/* Footer */}
+      <footer className="py-10 px-6 max-w-7xl mx-auto border-t border-slate-200 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-800">VALIDATEAI</span>
+          <span>•</span>
+          <span>Open Startup Idea Validation Platform</span>
+        </div>
+        <div>
+          <span>Local storage • Privacy first • No credit card required</span>
         </div>
       </footer>
     </div>

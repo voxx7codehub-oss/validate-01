@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CustomerType, BusinessModelType, StartupProject } from '../types';
-import { ArrowLeft, ArrowRight, Sparkles, Edit3 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Edit3, Zap, RotateCcw, CheckCircle2, HelpCircle } from 'lucide-react';
+import { STARTER_TEMPLATES, IdeaTemplate } from '../data/templates';
 
 interface CreateIdeaWizardProps {
   onCancel: () => void;
@@ -44,6 +45,39 @@ export const CreateIdeaWizard: React.FC<CreateIdeaWizardProps> = ({
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleApplyTemplate = (tpl: IdeaTemplate) => {
+    setStartupName(tpl.data.startupName);
+    setWhatBuilding(tpl.data.whatBuilding);
+    setProblemSolved(tpl.data.problemSolved);
+    setWhoExperiences(tpl.data.whoExperiences);
+    setPrimaryCustomer(tpl.data.primaryCustomer);
+    setIndustry(tpl.data.industry);
+    setGeography(tpl.data.geography);
+    setCustomerType(tpl.data.customerType);
+    setSolution(tpl.data.solution);
+    setValueProposition(tpl.data.valueProposition);
+    setBusinessModel(tpl.data.businessModel);
+    setTargetMarket(tpl.data.targetMarket);
+    setErrors({});
+  };
+
+  const handleResetForm = () => {
+    setStartupName('');
+    setWhatBuilding('');
+    setProblemSolved('');
+    setWhoExperiences('');
+    setPrimaryCustomer('');
+    setIndustry('');
+    setGeography('Global / US');
+    setCustomerType('Startup');
+    setSolution('');
+    setValueProposition('');
+    setBusinessModel('Subscription');
+    setTargetMarket('');
+    setErrors({});
+    setCurrentStep(1);
+  };
 
   const validateStep1 = () => {
     const errs: Record<string, string> = {};
@@ -99,89 +133,87 @@ export const CreateIdeaWizard: React.FC<CreateIdeaWizardProps> = ({
         costOfInaction: 'Lost time and unresolved operational friction',
         sourceType: 'USER INPUT',
       },
-      solution: {
-        coreConcept: solution.trim(),
-        valueProposition: valueProposition.trim(),
-        keyDifferentiators: [],
-        deliveryMechanism: 'Web Application',
-        sourceType: 'USER INPUT',
-      },
       customerAnalysis: {
         primaryCustomer: primaryCustomer.trim(),
         industry: industry.trim(),
         geography: geography.trim(),
-        customerType,
+        customerType: customerType,
         segments: [
           {
-            id: 'seg_initial',
-            name: primaryCustomer.trim(),
-            description: `Primary audience in ${industry.trim()}`,
-            customerType,
+            id: `seg_${Date.now()}`,
+            name: primaryCustomer.trim() || 'Primary Customer Segment',
+            description: `Target customers operating in ${industry || 'the primary vertical'}`,
+            customerType: customerType,
             primaryIndustry: industry.trim(),
             geography: geography.trim(),
             isPrimary: true,
-            buyingFactors: [],
-            typicalObjections: [],
+            buyingFactors: ['Time savings', 'Direct financial ROI', 'Simplicity'],
+            typicalObjections: ['Switching costs', 'Budget allocation'],
             sourceType: 'USER INPUT',
           },
         ],
         painPoints: [
           {
-            id: 'pain_initial',
+            id: `pain_${Date.now()}`,
             description: problemSolved.trim(),
-            severity: 'Moderate',
-            frequency: 'Regularly',
+            severity: 'Severe',
+            frequency: 'Weekly',
+            emotionalImpact: 'High friction and operational anxiety',
             sourceType: 'USER INPUT',
           },
         ],
-        currentBehavior: 'Using manual workarounds or suboptimal existing tools',
-        customerNeeds: [],
-        buyingFactors: [],
-        objections: [],
-        willingnessToPayNotes: 'Unvalidated - requires willingness-to-pay inquiry',
+        currentBehavior: `Currently addressing via manual processes or legacy alternatives.`,
+        customerNeeds: ['Reliable outcome', 'Affordable pricing', 'Fast setup'],
+        buyingFactors: ['Proven reliability', 'Transparent pricing', 'Support'],
+        objections: ['Implementation overhead', 'Learning curve'],
+        willingnessToPayNotes: 'Requires explicit customer interview verification.',
         interviewQuestions: [],
+      },
+      solution: {
+        coreConcept: solution.trim() || whatBuilding.trim(),
+        valueProposition: valueProposition.trim(),
+        uniqueAdvantage: 'Targeted focus on the specific problem space.',
+        assumedRisks: ['Customer willingness to switch', 'Execution complexity'],
         sourceType: 'USER INPUT',
       },
       businessModel: {
         modelType: businessModel,
-        valueProposition: valueProposition.trim(),
+        pricing: {
+          strategy: 'Value-Based',
+          tiers: [],
+          rationale: `Monetization based on ${businessModel.toLowerCase()} structure.`,
+          modelType: businessModel,
+        },
         revenueStreams: [
           {
-            id: 'rev_1',
+            id: `rev_${Date.now()}`,
             name: `${businessModel} Revenue`,
             modelType: businessModel,
             description: `Primary monetization via ${businessModel.toLowerCase()}`,
-            projectedContribution: '100%',
-            sourceType: 'USER INPUT',
+            estimatedContribution: 'Primary (100%)',
           },
         ],
-        pricing: {
+        costStructure: ['Server hosting & infrastructure', 'Customer acquisition', 'Support & operations'],
+        unitEconomicsNotes: 'Unit economics to be validated with early pilot cohorts.',
+        goToMarketStrategy: {
           type: businessModel,
-          rationale: 'Initial pricing hypothesis to be validated with early adopters',
-          sourceType: 'USER INPUT',
+          channels: ['Direct founder outreach', 'Targeted communities', 'Organic content'],
+          targetDuration: '30 days',
         },
-        customerChannels: [],
-        costStructure: ['Product Development', 'Customer Acquisition', 'Hosting & Infrastructure'],
-        keyResources: ['Founding Team', 'Proprietary Software'],
-        keyPartners: [],
-        sourceType: 'USER INPUT',
       },
       marketAnalysis: {
-        overview: `Targeting ${targetMarket.trim() || industry.trim()} segment.`,
         industry: industry.trim(),
-        targetMarket: targetMarket.trim() || `${customerType} in ${industry.trim()}`,
-        geography: geography.trim(),
-        trends: [],
-        drivers: [],
-        challenges: [],
-        opportunities: [],
+        targetMarket: targetMarket.trim() || `The ${industry || 'target'} market segment`,
+        overview: `Validation workspace focused on ${industry || 'the chosen domain'}.`,
         marketSize: {
           isVerified: false,
-          unverifiedMessage:
-            'Market size information is not available yet. Connect a research provider or add verified research.',
+          unverifiedMessage: 'Market size information is not available yet. Connect a research provider or add verified research.',
         },
+        trends: [],
+        drivers: ['Need for automation', 'Rising workflow complexity'],
+        challenges: ['Market fragmentation', 'Customer inertia'],
+        opportunities: ['Underserved niche workflows', 'Modern AI capabilities'],
         dataPoints: [],
-        sourceType: 'USER INPUT',
       },
       competitorAnalysis: {
         directCompetitors: [],
@@ -189,25 +221,51 @@ export const CreateIdeaWizard: React.FC<CreateIdeaWizardProps> = ({
         substitutes: [],
         gaps: [],
         differentiationPoints: [],
-        sourceType: 'USER INPUT',
       },
       feasibilityAnalysis: {
-        areas: [],
-        sourceType: 'USER INPUT',
-        updatedAt: new Date().toISOString(),
+        areas: [
+          {
+            area: 'Customer',
+            status: 'Uncertain',
+            summary: 'Customer willingness to switch from current alternatives must be tested.',
+            reasons: ['Habitual reliance on spreadsheets/manual workarounds'],
+            evidence: [],
+            assumptions: ['Customers feel acute enough pain to adopt new tooling'],
+          },
+          {
+            area: 'Product',
+            status: 'Feasible',
+            summary: 'Core MVP functionality can be built in a focused 2-3 week sprint.',
+            reasons: ['Leverages proven web and cloud architectures'],
+            evidence: [],
+            assumptions: ['Core problem can be solved with minimal UI'],
+          },
+        ],
       },
       swotAnalysis: {
-        strengths: [],
-        weaknesses: [],
-        opportunities: [],
-        threats: [],
-        sourceType: 'USER INPUT',
+        strengths: [{ id: 's1', text: 'Clear specific problem focus' }],
+        weaknesses: [{ id: 'w1', text: 'Unproven brand and early validation stage' }],
+        opportunities: [{ id: 'o1', text: 'Modern workflow integration' }],
+        threats: [{ id: 't1', text: 'Incumbents adding competing features' }],
       },
-      risks: [],
+      risks: [
+        {
+          id: `risk_${Date.now()}_1`,
+          title: 'Problem Severity Risk',
+          description: 'The problem might not occur frequently or severely enough for customers to pay.',
+          category: 'Customer',
+          likelihood: 'Medium',
+          impact: 'High',
+          mitigation: 'Conduct 10+ neutral discovery interviews focused on past behavior.',
+          validationAction: 'Customer interview sprint',
+          status: 'Active',
+          sourceType: 'USER INPUT',
+        },
+      ],
       assumptions: [
         {
-          id: `as_${Date.now()}_1`,
-          statement: `${primaryCustomer.trim()} experiences "${problemSolved.trim()}" frequently enough to urgently seek a solution.`,
+          id: `assump_${Date.now()}_1`,
+          statement: `${primaryCustomer || 'Target customers'} are actively frustrated by ${problemSolved || 'the current problem'}.`,
           category: 'Customer',
           priority: 'High',
           status: 'Unvalidated',
@@ -215,638 +273,511 @@ export const CreateIdeaWizard: React.FC<CreateIdeaWizardProps> = ({
           validationMethod: 'Interview',
           sourceType: 'ASSUMPTION',
         },
-        {
-          id: `as_${Date.now()}_2`,
-          statement: `Target customers are dissatisfied with existing alternatives and willing to pay for "${solution.trim()}".`,
-          category: 'Pricing',
-          priority: 'High',
-          status: 'Unvalidated',
-          evidence: '',
-          validationMethod: 'Pricing Test',
-          sourceType: 'ASSUMPTION',
-        },
       ],
       validationPlan: {
-        experiments: [
-          {
-            id: `exp_${Date.now()}_1`,
-            objective: 'Confirm problem frequency and severity with 5-10 target users.',
-            method: 'Interview',
-            participants: `5-10 ${primaryCustomer.trim()}`,
-            questions: [
-              'How do you currently handle this issue?',
-              'How often does this disrupt your workflow?',
-              'What workarounds have you tried in the past 6 months?',
-            ],
-            successCriteria: 'At least 70% of interviewees actively describe the problem as painful.',
-            status: 'Planned',
-            sourceType: 'USER INPUT',
-          },
-        ],
+        experiments: [],
+        recommendedActions: [],
         checklist: [
           {
             id: 'chk_1',
-            title: 'Talked to target customers',
-            description: 'Conducted exploratory customer discovery sessions without pitching.',
-            completed: false,
-          },
-          {
-            id: 'chk_2',
-            title: 'Confirmed the problem',
-            description: 'Verified that customers experience this problem regularly and painfully.',
-            completed: false,
-          },
-          {
-            id: 'chk_3',
-            title: 'Identified existing alternatives',
-            description: 'Documented all current tools, spreadsheets, and manual workarounds.',
-            completed: false,
-          },
-          {
-            id: 'chk_4',
-            title: 'Tested willingness to pay',
-            description: 'Gathered quantitative willingness-to-pay evidence or intent commits.',
-            completed: false,
-          },
-          {
-            id: 'chk_5',
-            title: 'Tested the proposed solution',
-            description: 'Walked customers through concept sketches or wireframes.',
-            completed: false,
-          },
-          {
-            id: 'chk_6',
-            title: 'Created an early version',
-            description: 'Built a focused MVP testing the single riskiest hypothesis.',
-            completed: false,
-          },
-          {
-            id: 'chk_7',
-            title: 'Collected real feedback',
-            description: 'Analyzed concrete usage data rather than polite compliments.',
-            completed: false,
-          },
-        ],
-        recommendedActions: [
-          {
-            id: `act_${Date.now()}_1`,
-            title: 'Interview target customers',
-            why: 'Confirm whether the problem occurs frequently enough to matter before coding.',
-            priority: 'Immediate',
-            status: 'Not Started',
+            title: 'Define clear customer persona',
+            completed: Boolean(primaryCustomer.trim()),
             category: 'Customer',
           },
           {
-            id: `act_${Date.now()}_2`,
-            title: 'Research existing solutions',
-            why: 'Discover what users currently do to solve or endure the issue.',
-            priority: 'Immediate',
-            status: 'Not Started',
+            id: 'chk_2',
+            title: 'Document specific problem statement',
+            completed: Boolean(problemSolved.trim()),
+            category: 'Problem',
+          },
+          {
+            id: 'chk_3',
+            title: 'Conduct 10 neutral customer discovery interviews',
+            completed: false,
+            category: 'Customer',
+          },
+          {
+            id: 'chk_4',
+            title: 'Map current alternative workarounds',
+            completed: false,
             category: 'Competition',
           },
+          {
+            id: 'chk_5',
+            title: 'Test willingness to pay with non-binding LOI or deposit',
+            completed: false,
+            category: 'Pricing',
+          },
+          {
+            id: 'chk_6',
+            title: 'Build and test Must-Have MVP only',
+            completed: false,
+            category: 'Product',
+          },
         ],
-        sourceType: 'USER INPUT',
       },
       mvpPlan: {
-        coreHypothesisToTest: `Validate whether ${primaryCustomer.trim()} will use the core ${solution.trim()} to solve their problem.`,
+        coreHypothesisToTest: `Will ${primaryCustomer || 'target users'} adopt a simple focused solution to solve ${problemSolved || 'their primary pain'}?`,
         buildTargetDuration: '2-3 weeks',
         features: [
           {
-            id: `mvp_${Date.now()}_1`,
-            feature: 'Core Problem Resolution Workflow',
-            description: `Minimal implementation of ${solution.trim()}`,
+            id: `f_${Date.now()}_1`,
+            feature: 'Core Problem Workflow',
+            description: valueProposition || 'The single primary task needed to deliver value.',
             priority: 'MUST HAVE',
-            reason: 'Directly tests the central value proposition.',
-            validationPurpose: 'Verify users can accomplish the core job without manual intervention.',
+            reason: 'Essential to prove whether the user achieves their desired outcome.',
+            validationPurpose: 'Test if core utility alone solves the problem.',
             sourceType: 'USER INPUT',
           },
         ],
-        sourceType: 'USER INPUT',
       },
       gtmPlan: {
-        initialCustomer: primaryCustomer.trim(),
-        positioning: valueProposition.trim(),
+        initialCustomer: primaryCustomer.trim() || 'Early adopter segment',
+        positioning: valueProposition.trim() || 'Direct, specialized solution for specific friction.',
         acquisitionChannels: [
           {
-            id: 'gtm_1',
-            channel: 'Direct Outreach / Cold Outreach',
-            tactics: 'Personalized email and LinkedIn messages to 50 target personas',
-            expectedCost: 'Low ($0 - $100)',
+            id: `ch_${Date.now()}_1`,
+            channel: 'Direct Outreach',
+            tactics: 'Personalized outreach to 30 ideal customer profiles.',
+            expectedCost: 'Low',
             feasibility: 'High',
           },
         ],
-        salesApproach: 'Founder-led sales and consultative customer discovery',
-        launchExperiment: 'Landing page with waitlist and manual concierge onboarding',
-        firstAction: `Identify 20 ${primaryCustomer.trim()} on LinkedIn or industry forums this week`,
-        sourceType: 'USER INPUT',
+        salesApproach: 'Founder-led consultative sales',
+        launchExperiment: '5 Pilot customer cohort',
+        firstAction: 'Schedule first 5 discovery calls',
       },
-      evidence: [],
     };
 
     onSubmit(projectPayload);
   };
 
   const steps = [
-    { number: 1, label: '01 Idea' },
-    { number: 2, label: '02 Customer' },
-    { number: 3, label: '03 Business' },
-    { number: 4, label: '04 Review' },
+    { num: 1, title: 'The Idea', desc: 'Problem & Target' },
+    { num: 2, title: 'The Customer', desc: 'Segment & Industry' },
+    { num: 3, title: 'The Business', desc: 'Solution & Model' },
+    { num: 4, title: 'Review & Analyze', desc: 'Confirm & Validate' },
   ];
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-6">
-      {/* Top Header */}
-      <div className="flex items-center justify-between pb-6 border-b border-slate-200 mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Create Your Startup Idea</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Follow the 4-step framework to structure your concept for objective validation.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-xs text-slate-500 hover:text-slate-700 px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors"
-        >
-          Cancel
-        </button>
-      </div>
-
-      {/* Stepper Navigation */}
-      <div className="grid grid-cols-4 gap-2 mb-8">
-        {steps.map((s) => {
-          const isActive = currentStep === s.number;
-          const isDone = currentStep > s.number;
-          return (
+    <div className="min-h-screen bg-[#F7F9FC] py-8 px-4 sm:px-6 flex justify-center">
+      <div className="w-full max-w-3xl">
+        {/* Top Header */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={onCancel}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Cancel
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-900">Step {currentStep} of 4</span>
             <button
-              key={s.number}
-              type="button"
-              onClick={() => {
-                if (isDone) setCurrentStep(s.number as any);
-              }}
-              disabled={!isDone && !isActive}
-              className={`text-left p-3 rounded-lg border transition-all ${
-                isActive
-                  ? 'border-blue-600 bg-blue-50/50'
-                  : isDone
-                  ? 'border-slate-300 bg-white hover:bg-slate-50 cursor-pointer'
-                  : 'border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed'
-              }`}
+              onClick={handleResetForm}
+              title="Reset all fields"
+              className="text-xs text-slate-400 hover:text-slate-700 p-1.5 rounded-md hover:bg-slate-200/50 transition-colors flex items-center gap-1"
             >
+              <RotateCcw className="w-3 h-3" />
+              <span className="hidden sm:inline">Reset</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 1-Click Starter Template Bar */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-4 mb-6 shadow-xs">
+          <div className="flex items-center justify-between gap-2 mb-2.5">
+            <span className="text-xs font-bold text-blue-950 flex items-center gap-1.5">
+              <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+              1-Click Idea Templates (Instant Fill):
+            </span>
+            <span className="text-[11px] text-blue-700 font-medium">Click to auto-fill</span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {STARTER_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                type="button"
+                onClick={() => handleApplyTemplate(tpl)}
+                className="whitespace-nowrap px-3 py-1.5 text-xs font-medium bg-white text-slate-700 hover:text-blue-600 hover:border-blue-300 border border-slate-200 rounded-lg shadow-2xs hover:shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <span>{tpl.name}</span>
+                <span className="text-[10px] text-slate-400">({tpl.category.split('&')[0].trim()})</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Progress Stepper */}
+        <div className="grid grid-cols-4 gap-2 mb-6">
+          {steps.map((s) => {
+            const isDone = currentStep > s.num;
+            const isCurrent = currentStep === s.num;
+            return (
               <div
-                className={`text-xs font-semibold ${
-                  isActive ? 'text-blue-700' : isDone ? 'text-slate-800' : 'text-slate-400'
+                key={s.num}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  isCurrent
+                    ? 'bg-white border-blue-600 shadow-sm ring-1 ring-blue-500/20'
+                    : isDone
+                    ? 'bg-blue-50/50 border-blue-200 text-slate-700'
+                    : 'bg-white/60 border-slate-200 text-slate-400'
                 }`}
               >
-                {s.label}
+                <div className="flex items-center gap-1.5 text-[11px] font-bold">
+                  {isDone ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  ) : (
+                    <span
+                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                        isCurrent ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {s.num}
+                    </span>
+                  )}
+                  <span className={`truncate ${isCurrent ? 'text-blue-600' : ''}`}>{s.title}</span>
+                </div>
+                <div className="text-[10px] text-slate-500 mt-0.5 hidden sm:block truncate">
+                  {s.desc}
+                </div>
               </div>
-              <div className="text-[11px] text-slate-500 mt-0.5 truncate">
-                {s.number === 1
-                  ? 'Concept & Problem'
-                  : s.number === 2
-                  ? 'Target Persona'
-                  : s.number === 3
-                  ? 'Model & Value'
-                  : 'Final Summary'}
-              </div>
-            </button>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      {/* Step Content */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 shadow-sm mb-6">
-        {currentStep === 1 && (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                Startup Name <span className="text-xs text-slate-400 font-normal">(Optional)</span>
-              </label>
-              <input
-                type="text"
-                value={startupName}
-                onChange={(e) => setStartupName(e.target.value)}
-                placeholder="e.g., FleetFlow, DocuPulse, ShelfCraft"
-                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                A working title for your validation workspace. You can change this anytime.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                What are you building? <span className="text-rose-500">*</span>
-              </label>
-              <textarea
-                rows={3}
-                value={whatBuilding}
-                onChange={(e) => setWhatBuilding(e.target.value)}
-                placeholder="e.g., An automated inventory replenishment tool for independent specialty retail coffee shops..."
-                className={`w-full px-3.5 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
-                  errors.whatBuilding ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
-                }`}
-              />
-              {errors.whatBuilding && (
-                <p className="text-xs text-rose-600 mt-1">{errors.whatBuilding}</p>
-              )}
-              <p className="text-xs text-slate-500 mt-1">
-                Explain the product or service in plain language without buzzwords.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                What problem does it solve? <span className="text-rose-500">*</span>
-              </label>
-              <textarea
-                rows={3}
-                value={problemSolved}
-                onChange={(e) => setProblemSolved(e.target.value)}
-                placeholder="e.g., Coffee shop managers spend 6+ hours weekly manually auditing beans and milk in paper notebooks, frequently stock out on weekends, or waste expired perishables..."
-                className={`w-full px-3.5 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
-                  errors.problemSolved ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
-                }`}
-              />
-              {errors.problemSolved && (
-                <p className="text-xs text-rose-600 mt-1">{errors.problemSolved}</p>
-              )}
-              <p className="text-xs text-slate-500 mt-1">
-                Describe the specific friction, financial waste, or time drain experienced today.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                Who experiences this problem? <span className="text-rose-500">*</span>
-              </label>
-              <textarea
-                rows={2}
-                value={whoExperiences}
-                onChange={(e) => setWhoExperiences(e.target.value)}
-                placeholder="e.g., General managers and head baristas at independent coffee shops with 1-5 locations..."
-                className={`w-full px-3.5 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
-                  errors.whoExperiences ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
-                }`}
-              />
-              {errors.whoExperiences && (
-                <p className="text-xs text-rose-600 mt-1">{errors.whoExperiences}</p>
-              )}
-              <p className="text-xs text-slate-500 mt-1">
-                Be specific about who deals with this day-to-day.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && (
-          <div className="space-y-6">
-            <h2 className="text-lg font-bold text-slate-900 pb-2 border-b border-slate-100">
-              Who is this for?
-            </h2>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                Primary Customer <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={primaryCustomer}
-                onChange={(e) => setPrimaryCustomer(e.target.value)}
-                placeholder="e.g., Independent Coffee Shop Owner / Operator"
-                className={`w-full px-3.5 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
-                  errors.primaryCustomer ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
-                }`}
-              />
-              {errors.primaryCustomer && (
-                <p className="text-xs text-rose-600 mt-1">{errors.primaryCustomer}</p>
-              )}
-              <p className="text-xs text-slate-500 mt-1">
-                The individual or role who has the authority or budget to adopt your solution.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Step Card Form */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs mb-6 space-y-6">
+          {/* STEP 1: IDEA */}
+          {currentStep === 1 && (
+            <div className="space-y-5 animate-in fade-in duration-150">
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-1">
-                  Industry <span className="text-rose-500">*</span>
+                <h3 className="text-lg font-bold text-slate-900">Define Your Startup Idea</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Focus on describing the concrete pain point and who experiences it in plain words.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Startup / Project Name <span className="text-slate-400 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
-                  value={industry}
-                  onChange={(e) => setIndustry(e.target.value)}
-                  placeholder="e.g., Food & Beverage / Specialty Hospitality"
-                  className={`w-full px-3.5 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
-                    errors.industry ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                  value={startupName}
+                  onChange={(e) => setStartupName(e.target.value)}
+                  placeholder="e.g. InvoiceFlow, EcoPack, PitchPulse"
+                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  What are you building? <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={whatBuilding}
+                  onChange={(e) => setWhatBuilding(e.target.value)}
+                  placeholder="e.g. An autonomous micro-invoicing tool for solo freelancers that predicts late payments and drafts polite follow-up reminders."
+                  className={`w-full px-3.5 py-2.5 text-xs sm:text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
+                    errors.whatBuilding ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
                   }`}
                 />
-                {errors.industry && (
-                  <p className="text-xs text-rose-600 mt-1">{errors.industry}</p>
+                {errors.whatBuilding && (
+                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.whatBuilding}</p>
+                )}
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Tip: Describe what the product does simply, without buzzwords like "uber for x" or "disruptive AI".
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  What specific problem does it solve? <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={problemSolved}
+                  onChange={(e) => setProblemSolved(e.target.value)}
+                  placeholder="e.g. Freelancers spend 4+ unpaid hours every week tracking milestone approvals, chasing overdue invoices, and feeling awkward asking clients for money."
+                  className={`w-full px-3.5 py-2.5 text-xs sm:text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
+                    errors.problemSolved ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                  }`}
+                />
+                {errors.problemSolved && (
+                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.problemSolved}</p>
+                )}
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Tip: Focus on quantifiable friction: lost hours, wasted dollars, or emotional stress.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Who experiences this problem? <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={whoExperiences}
+                  onChange={(e) => setWhoExperiences(e.target.value)}
+                  placeholder="e.g. Solo freelance designers, software contractors, and boutique agencies"
+                  className={`w-full px-3.5 py-2.5 text-xs sm:text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
+                    errors.whoExperiences ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                  }`}
+                />
+                {errors.whoExperiences && (
+                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.whoExperiences}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: CUSTOMER */}
+          {currentStep === 2 && (
+            <div className="space-y-5 animate-in fade-in duration-150">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Identify Your Target Customer</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Nailing a specific initial niche is critical for early customer interviews.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Primary Customer Profile <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={primaryCustomer}
+                  onChange={(e) => setPrimaryCustomer(e.target.value)}
+                  placeholder="e.g. Independent creative contractors with 3-10 active clients"
+                  className={`w-full px-3.5 py-2.5 text-xs sm:text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
+                    errors.primaryCustomer ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                  }`}
+                />
+                {errors.primaryCustomer && (
+                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.primaryCustomer}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Industry / Vertical <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={industry}
+                    onChange={(e) => setIndustry(e.target.value)}
+                    placeholder="e.g. Design & Creative Services"
+                    className={`w-full px-3.5 py-2.5 text-xs sm:text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
+                      errors.industry ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                    }`}
+                  />
+                  {errors.industry && (
+                    <p className="text-xs text-rose-600 mt-1 font-medium">{errors.industry}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 mb-1">
+                    Target Geography
+                  </label>
+                  <input
+                    type="text"
+                    value={geography}
+                    onChange={(e) => setGeography(e.target.value)}
+                    placeholder="e.g. North America, Global, US & Europe"
+                    className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-2">
+                  Customer Classification
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: 'B2B SMB', label: 'B2B SMB', desc: 'Small teams / businesses' },
+                    { id: 'B2B Enterprise', label: 'Enterprise', desc: 'Large organizations' },
+                    { id: 'B2C', label: 'B2C Consumers', desc: 'Individual end users' },
+                    { id: 'Startup', label: 'Startups & Pros', desc: 'Founders & creators' },
+                  ].map((ct) => (
+                    <button
+                      key={ct.id}
+                      type="button"
+                      onClick={() => setCustomerType(ct.id as CustomerType)}
+                      className={`p-3 rounded-xl border text-left transition-all ${
+                        customerType === ct.id
+                          ? 'border-blue-600 bg-blue-50/60 font-semibold text-blue-900 shadow-2xs'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white'
+                      }`}
+                    >
+                      <div className="text-xs font-bold">{ct.label}</div>
+                      <div className="text-[10px] text-slate-500 mt-0.5">{ct.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: BUSINESS */}
+          {currentStep === 3 && (
+            <div className="space-y-5 animate-in fade-in duration-150">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Solution & Business Model</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  How will you solve the problem and generate sustainable revenue?
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Proposed Solution Concept <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={solution}
+                  onChange={(e) => setSolution(e.target.value)}
+                  placeholder="e.g. Zero-setup web app connecting Stripe with WhatsApp to automate milestone invoice escalations."
+                  className={`w-full px-3.5 py-2.5 text-xs sm:text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
+                    errors.solution ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                  }`}
+                />
+                {errors.solution && (
+                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.solution}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-900 mb-1">
-                  Geography
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  Core Value Proposition <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={geography}
-                  onChange={(e) => setGeography(e.target.value)}
-                  placeholder="e.g., United States, North America, Global"
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
+                  value={valueProposition}
+                  onChange={(e) => setValueProposition(e.target.value)}
+                  placeholder="e.g. Get paid 12 days faster and eliminate awkward client money conversations."
+                  className={`w-full px-3.5 py-2.5 text-xs sm:text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
+                    errors.valueProposition ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
+                  }`}
                 />
+                {errors.valueProposition && (
+                  <p className="text-xs text-rose-600 mt-1 font-medium">{errors.valueProposition}</p>
+                )}
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Customer Type
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {(
-                  [
-                    'Consumer',
-                    'Small Business',
-                    'Startup',
-                    'Enterprise',
-                    'Government',
-                    'Education',
-                    'Other',
-                  ] as CustomerType[]
-                ).map((ct) => (
-                  <button
-                    key={ct}
-                    type="button"
-                    onClick={() => setCustomerType(ct)}
-                    className={`py-2 px-3 text-xs font-medium rounded-md border text-center transition-colors ${
-                      customerType === ct
-                        ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {ct}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 3 && (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                Solution <span className="text-rose-500">*</span>
-              </label>
-              <textarea
-                rows={3}
-                value={solution}
-                onChange={(e) => setSolution(e.target.value)}
-                placeholder="e.g., A mobile and web platform that connects to point-of-sale systems, auto-forecasts weekly ingredient needs based on foot traffic, and drafts one-click replenishment purchase orders..."
-                className={`w-full px-3.5 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
-                  errors.solution ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
-                }`}
-              />
-              {errors.solution && (
-                <p className="text-xs text-rose-600 mt-1">{errors.solution}</p>
-              )}
-              <p className="text-xs text-slate-500 mt-1">
-                Explain how your product fundamentally solves the problem.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                Value Proposition <span className="text-rose-500">*</span>
-              </label>
-              <textarea
-                rows={2}
-                value={valueProposition}
-                onChange={(e) => setValueProposition(e.target.value)}
-                placeholder="e.g., Save 5 hours every week on inventory management while reducing weekend stockouts by 80%."
-                className={`w-full px-3.5 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400 ${
-                  errors.valueProposition ? 'border-rose-400 bg-rose-50/20' : 'border-slate-300'
-                }`}
-              />
-              {errors.valueProposition && (
-                <p className="text-xs text-rose-600 mt-1">{errors.valueProposition}</p>
-              )}
-              <p className="text-xs text-slate-500 mt-1">
-                The primary measurable benefit or outcome promised to the buyer.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Business Model
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {(
-                  [
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-2">
+                  Revenue / Business Model
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
                     'Subscription',
-                    'One-time Purchase',
+                    'Usage-Based',
                     'Marketplace',
-                    'Commission',
                     'Freemium',
-                    'Advertising',
-                    'Usage Based',
-                    'Other',
-                  ] as BusinessModelType[]
-                ).map((bm) => (
-                  <button
-                    key={bm}
-                    type="button"
-                    onClick={() => setBusinessModel(bm)}
-                    className={`py-2 px-3 text-xs font-medium rounded-md border text-center transition-colors ${
-                      businessModel === bm
-                        ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
-                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {bm}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-1">
-                Target Market
-              </label>
-              <input
-                type="text"
-                value={targetMarket}
-                onChange={(e) => setTargetMarket(e.target.value)}
-                placeholder="e.g., 40,000 independent specialty coffee shops in the US"
-                className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 placeholder:text-slate-400"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Your initial initial niche or beachhead market.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 4 && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Review Your Startup Idea</h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Review your core assumptions. You can click Edit on any section to make adjustments before running analysis.
-              </p>
-            </div>
-
-            {/* Card 1: Idea & Problem */}
-            <div className="border border-slate-200 rounded-lg p-5 bg-slate-50/50">
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  01 Idea & Problem
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  <Edit3 className="w-3 h-3" />
-                  Edit
-                </button>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="font-semibold text-slate-800">Startup Name: </span>
-                  <span className="text-slate-900">{startupName || 'Untitled Startup'}</span>
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800">What you are building: </span>
-                  <p className="text-slate-700 mt-0.5 whitespace-pre-wrap">{whatBuilding}</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800">Problem solved: </span>
-                  <p className="text-slate-700 mt-0.5 whitespace-pre-wrap">{problemSolved}</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800">Who experiences this: </span>
-                  <p className="text-slate-700 mt-0.5 whitespace-pre-wrap">{whoExperiences}</p>
+                    'One-Time',
+                    'Enterprise License',
+                  ].map((bm) => (
+                    <button
+                      key={bm}
+                      type="button"
+                      onClick={() => setBusinessModel(bm as BusinessModelType)}
+                      className={`p-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
+                        businessModel === bm
+                          ? 'border-blue-600 bg-blue-50/60 text-blue-900 shadow-2xs'
+                          : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white'
+                      }`}
+                    >
+                      {bm}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Card 2: Customer */}
-            <div className="border border-slate-200 rounded-lg p-5 bg-slate-50/50">
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  02 Customer
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  <Edit3 className="w-3 h-3" />
-                  Edit
-                </button>
+          {/* STEP 4: REVIEW */}
+          {currentStep === 4 && (
+            <div className="space-y-5 animate-in fade-in duration-150">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Review & Launch Validation</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Confirm your parameters. VALIDATEAI will analyze your assumptions without hallucinating vanity metrics.
+                </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="font-semibold text-slate-800">Primary Customer: </span>
-                  <span className="text-slate-900">{primaryCustomer}</span>
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800">Customer Type: </span>
-                  <span className="text-slate-900">{customerType}</span>
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800">Industry: </span>
-                  <span className="text-slate-900">{industry}</span>
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800">Geography: </span>
-                  <span className="text-slate-900">{geography}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Card 3: Business */}
-            <div className="border border-slate-200 rounded-lg p-5 bg-slate-50/50">
-              <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  03 Business
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(3)}
-                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  <Edit3 className="w-3 h-3" />
-                  Edit
-                </button>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3 text-xs">
+                <div className="flex justify-between py-1 border-b border-slate-200/80">
+                  <span className="text-slate-500 font-medium">Startup Title:</span>
+                  <span className="font-bold text-slate-900">{startupName || 'Untitled Startup'}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/80">
+                  <span className="text-slate-500 font-medium">Target Customer:</span>
+                  <span className="font-bold text-slate-900">{primaryCustomer} ({customerType})</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/80">
+                  <span className="text-slate-500 font-medium">Industry:</span>
+                  <span className="font-bold text-slate-900">{industry}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/80">
+                  <span className="text-slate-500 font-medium">Business Model:</span>
+                  <span className="font-bold text-slate-900">{businessModel}</span>
+                </div>
+                <div className="pt-1">
+                  <span className="text-slate-500 font-medium block mb-1">Core Problem Statement:</span>
+                  <p className="text-slate-800 bg-white p-2.5 rounded-lg border border-slate-200 leading-relaxed">
+                    {problemSolved}
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2 text-sm">
+
+              <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl text-blue-950 text-xs flex items-start gap-2">
+                <Sparkles className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold text-slate-800">Solution: </span>
-                  <p className="text-slate-700 mt-0.5 whitespace-pre-wrap">{solution}</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-slate-800">Value Proposition: </span>
-                  <p className="text-slate-700 mt-0.5 whitespace-pre-wrap">{valueProposition}</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <span className="font-semibold text-slate-800">Business Model: </span>
-                    <span className="text-slate-900">{businessModel}</span>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-800">Target Market: </span>
-                    <span className="text-slate-900">{targetMarket || 'Unspecified'}</span>
-                  </div>
+                  <strong>Next up:</strong> VALIDATEAI will synthesize your validation backlog, draft 5 neutral customer interview questions, scope your 3-bucket MVP, and design empirical testing experiments.
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Action Footer */}
-      <div className="flex items-center justify-between">
-        {currentStep > 1 ? (
-          <button
-            type="button"
-            onClick={() => setCurrentStep((prev) => (prev - 1) as any)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-md transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Back
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            Cancel
-          </button>
-        )}
+        {/* Action Controls */}
+        <div className="flex items-center justify-between">
+          {currentStep > 1 ? (
+            <button
+              onClick={() => setCurrentStep((currentStep - 1) as any)}
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-1.5 shadow-2xs"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Back
+            </button>
+          ) : (
+            <div></div>
+          )}
 
-        {currentStep < 4 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-          >
-            Continue
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleFinish}
-            className="inline-flex items-center gap-2 px-6 py-2.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md shadow-sm transition-colors"
-          >
-            <Sparkles className="w-4 h-4" />
-            Analyze My Idea
-          </button>
-        )}
+          {currentStep < 4 ? (
+            <button
+              onClick={handleNext}
+              className="px-6 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition-colors flex items-center gap-2"
+            >
+              <span>Continue</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={handleFinish}
+              className="px-7 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition-all flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Generate Validation Plan</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
